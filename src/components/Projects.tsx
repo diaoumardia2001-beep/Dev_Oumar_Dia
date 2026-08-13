@@ -135,8 +135,6 @@ export default function Projects() {
                     {featuredProject.demoUrl && (
                       <a
                         href={featuredProject.demoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#8A2BE2] hover:bg-[#7b24cc] text-white text-sm font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(138,43,226,0.4)] hover:scale-105"
                       >
                         <span>Voir la démo</span>
@@ -233,8 +231,6 @@ export default function Projects() {
                   {project.demoUrl && (
                     <a
                       href={project.demoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#8A2BE2] text-white text-xs font-semibold hover:bg-[#7b24cc] transition-all duration-300 shadow-[0_0_15px_rgba(138,43,226,0.3)]"
                     >
                       <span>Voir la démo</span>
