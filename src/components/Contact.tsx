@@ -50,16 +50,56 @@ export default function Contact() {
     message: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.message) {
-      setIsSubmitted(true);
-      setTimeout(() => {
-        setIsSubmitted(false);
+    setErrorMessage(null);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setErrorMessage("Veuillez remplir tous les champs du formulaire.");
+      return;
+    }
+
+    if (!emailRegex.test(formData.email.trim())) {
+      setErrorMessage("Veuillez saisir une adresse email valide.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSubmitted(true);
         setFormData({ name: "", email: "", message: "" });
-      }, 5000);
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 6000);
+      } else {
+        setErrorMessage(
+          data.error || "Impossible d'envoyer le message. Veuillez réessayer."
+        );
+      }
+    } catch (err) {
+      console.error("Erreur d'envoi du formulaire:", err);
+      setErrorMessage(
+        "Impossible d'envoyer le message. Veuillez réessayer."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -243,6 +283,12 @@ export default function Contact() {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {errorMessage && (
+                  <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm">
+                    {errorMessage}
+                  </div>
+                )}
+
                 {/* Nom */}
                 <div>
                   <label
@@ -257,12 +303,13 @@ export default function Contact() {
                       id="contact-name"
                       type="text"
                       required
+                      disabled={isSubmitting}
                       placeholder="Ex: Jean Kouassi"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300 disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -281,12 +328,13 @@ export default function Contact() {
                       id="contact-email"
                       type="email"
                       required
+                      disabled={isSubmitting}
                       placeholder="jean.kouassi@exemple.com"
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300 disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -302,23 +350,34 @@ export default function Contact() {
                   <textarea
                     id="contact-message"
                     required
+                    disabled={isSubmitting}
                     rows={4}
                     placeholder="Bonjour Oumar, je souhaite échanger au sujet de..."
                     value={formData.message}
                     onChange={(e) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300 resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#8A2BE2] focus:ring-1 focus:ring-[#8A2BE2] focus:bg-white/10 transition-all duration-300 resize-none disabled:opacity-50"
                   />
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#8A2BE2] to-[#7b24cc] hover:from-[#9d3cf5] hover:to-[#8A2BE2] text-white font-semibold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(138,43,226,0.4)] hover:shadow-[0_0_30px_rgba(138,43,226,0.7)] hover:scale-[1.01] active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#8A2BE2]"
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#8A2BE2] to-[#7b24cc] hover:from-[#9d3cf5] hover:to-[#8A2BE2] text-white font-semibold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(138,43,226,0.4)] hover:shadow-[0_0_30px_rgba(138,43,226,0.7)] hover:scale-[1.01] active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#8A2BE2] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Envoyer le message</span>
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Envoi en cours...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Envoyer le message</span>
+                    </>
+                  )}
                 </button>
               </form>
             )}
